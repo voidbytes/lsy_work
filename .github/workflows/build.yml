@@ -34,6 +34,14 @@ jobs:
       with:
         cmake-version: '3.20.x'
 
+    - name: Setup MinGW
+      if: runner.os == 'Windows'
+      uses: msys2/setup-msys2@v2
+      with:
+        msystem: MINGW64
+        update: true
+        install: mingw-w64-x86_64-gcc mingw-w64-x86_64-cmake mingw-w64-x86_64-make
+
     - name: Configure CMake (Unix)
       if: runner.os != 'Windows'
       run: |
@@ -46,7 +54,8 @@ jobs:
       run: |
         mkdir build
         cd build
-        cmake .. -DCMAKE_BUILD_TYPE=Release
+        cmake .. -DCMAKE_BUILD_TYPE=Release -G "MinGW Makefiles"
+      shell: msys2 {0}
 
     - name: Build
       run: |
@@ -57,14 +66,15 @@ jobs:
       if: runner.os != 'Windows'
       run: |
         cd build
-        ./run_tests
+        ctest -C Release -V
 
     - name: Run Tests (Windows)
       if: runner.os == 'Windows'
       run: |
         cd build
-        .\Release\run_tests.exe
+        ctest -C Release -V
       continue-on-error: true
+      shell: msys2 {0}
 
     - name: Package artifacts (Unix)
       if: runner.os != 'Windows'
@@ -79,68 +89,67 @@ jobs:
       run: |
         cd build
         mkdir release
-        copy Release\lsy_work.exe release\${{ matrix.asset_name }}
+        cp lsy_work.exe release/${{ matrix.asset_name }}
         tar -czf ${{ matrix.asset_name }}.tar.gz -C release .
-      shell: cmd
+      shell: msys2 {0}
 
     - name: Upload build artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v6
       with:
         name: ${{ matrix.asset_name }}
         path: build/${{ matrix.asset_name }}.tar.gz
         retention-days: 30
 
     - name: Upload executable
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v6
       with:
-        name: executables
+        name: executable-${{ matrix.os }}
         path: build/release/${{ matrix.asset_name }}
         retention-days: 30
 
-  create-release:
-    name: Create Release
-    needs: build
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    
-    steps:
-    - name: Download all artifacts
-      uses: actions/download-artifact@v3
-      with:
-        name: executables
-        path: ./artifacts
+#  create-release:
+#    name: Create Release
+#    needs: build
+#    runs-on: ubuntu-latest
+#    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+#
+#    steps:
+#    - name: Download all artifacts
+#      uses: actions/download-artifact@v3
+#      with:
+#        path: ./artifacts
+#
+#    - name: Display structure of downloaded files
+#      run: ls -R ./artifacts
+#
+#    - name: Get current date
+#      id: date
+#      run: echo "date=$(date +'%Y%m%d-%H%M%S')" >> $GITHUB_OUTPUT
 
-    - name: Display structure of downloaded files
-      run: ls -R ./artifacts
-
-    - name: Get current date
-      id: date
-      run: echo "date=$(date +'%Y%m%d-%H%M%S')" >> $GITHUB_OUTPUT
-
-    - name: Create Release
-      uses: softprops/action-gh-release@v1
-      with:
-        tag_name: build-${{ steps.date.outputs.date }}
-        name: Auto Build ${{ steps.date.outputs.date }}
-        body: |
-          自动构建版本
-          
-          ## 构建信息
-          - 构建时间: ${{ steps.date.outputs.date }}
-          - 提交: ${{ github.sha }}
-          - 分支: ${{ github.ref }}
-          
-          ## 包含平台
-          - ✅ Linux (x64)
-          - ✅ macOS (x64)
-          - ✅ Windows (x64)
-          
-          ## 使用说明
-          1. 下载对应平台的可执行文件
-          2. Linux/macOS: 添加执行权限 `chmod +x lsy_work-*`
-          3. 直接运行程序
-        files: ./artifacts/*
-        draft: false
-        prerelease: false
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#    - name: Create Release
+#      uses: softprops/action-gh-release@v1
+#      with:
+#        tag_name: build-${{ steps.date.outputs.date }}
+#        name: Auto Build ${{ steps.date.outputs.date }}
+#        body: |
+#          自动构建版本
+#
+#          ## 构建信息
+#          - 构建时间: ${{ steps.date.outputs.date }}
+#          - 提交: ${{ github.sha }}
+#          - 分支: ${{ github.ref }}
+#
+#          ## 包含平台
+#          - ✅ Linux (x64)
+#          - ✅ macOS (x64)
+#          - ✅ Windows (x64)
+#
+#          ## 使用说明
+#          1. 下载对应平台的可执行文件
+#          2. Linux/macOS: 添加执行权限 `chmod +x lsy_work-*`
+#          3. 直接运行程序
+#        files: ./artifacts/*
+#        draft: false
+#        prerelease: false
+#      env:
+#        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
