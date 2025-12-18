@@ -1,0 +1,50 @@
+# 构建目录
+build/
+cmake-build-*/
+Release/
+Debug/
+
+# 可执行文件
+*.exe
+*.out
+lsy_work
+run_tests
+
+# 数据文件
+*.db
+*.auth
+*.csv
+
+# 编译产物
+*.o
+*.obj
+*.a
+*.lib
+*.so
+*.dylib
+*.dll
+
+# CMake缓存
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+*.cmake
+
+# IDE配置
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# macOS
+.DS_Store
+
+# 测试产物
+test_*
+Testing/
+
+# 打包文件
+*.tar.gz
+*.zip
