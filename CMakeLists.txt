@@ -5,13 +5,29 @@ set(CMAKE_C_STANDARD 99)
 set(CMAKE_CXX_STANDARD 11)
 
 # 设置编译器警告标志
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
+
+# 平台特定配置
 if(MSVC)
-    # Visual Studio 编译器警告标志
-    add_compile_options(/W3)
-else()
-    # GCC/Clang 警告标志
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
+    # Visual Studio 静态链接标志
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /MT")
+    # Visual Studio Release 优化标志
+    set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} /Ox /Ot /GL /Gw /GF")
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /Ox /Ot /GL /Gw /GF")
+    set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} /LTCG /OPT:REF /OPT:ICF")
+elif(CMAKE_SYSTEM_NAME MATCHES "Darwin")
+    # macOS Release 优化标志
+    set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O3 -march=native -mtune=native -flto -ffast-math -fomit-frame-pointer -funroll-loops -fmerge-all-constants -fdata-sections -ffunction-sections")
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -march=native -mtune=native -flto -ffast-math -fomit-frame-pointer -funroll-loops -fmerge-all-constants -fdata-sections -ffunction-sections")
+    set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} -flto -dead_strip")
+elseif(CMAKE_SYSTEM_NAME MATCHES "Linux")
+    # Linux 全静态链接标志
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static -static-libgcc -static-libstdc++")
+    # Linux Release 优化标志
+    set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O3 -march=native -mtune=native -flto -ffast-math -fomit-frame-pointer -funroll-loops -fmerge-all-constants -fdata-sections -ffunction-sections")
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -march=native -mtune=native -flto -ffast-math -fomit-frame-pointer -funroll-loops -fmerge-all-constants -fdata-sections -ffunction-sections")
+    set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} -flto -Wl,--gc-sections -Wl,--strip-all")
 endif()
 
 # 代码覆盖率选项
