@@ -117,7 +117,7 @@ ErrorCode storage_load_employees(const char *filename, EmployeeManager *manager)
         
         checksum += calculate_checksum(emp, sizeof(Employee));
         
-        ErrorCode err = manager->employees->push_back(manager->employees, emp);
+        ErrorCode err = vector_push_back(manager->employees, emp);
         if (err != SUCCESS) {
             free(emp);
             fclose(fp);

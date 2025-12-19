@@ -4,7 +4,6 @@
 ![Build Status](https://img.shields.io/badge/build-passing-brightgreen)
 ![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-blue)
 ![Language](https://img.shields.io/badge/language-C99-orange)
-![License](https://img.shields.io/badge/license-MIT-green)
 
 ## 项目概述
 
@@ -54,7 +53,10 @@ lsy-work/
 └── tests/                # 单元测试
     ├── test_vector.cpp   # Vector模块测试
     ├── test_model.cpp    # Model模块测试
-    └── test_storage.cpp  # Storage模块测试
+    ├── test_storage.cpp  # Storage模块测试
+    ├── test_sort.cpp     # Sort模块测试
+    ├── test_controller.cpp # Controller模块测试
+    └── test_view.cpp     # View模块测试
 ```
 
 ## 功能特性
@@ -256,7 +258,7 @@ make -j4
 
 项目包含完整的单元测试,覆盖所有核心模块:
 
-### Vector测试 (7个测试用例)
+### Vector测试
 - 创建和释放
 - 添加元素
 - 获取元素
@@ -265,7 +267,7 @@ make -j4
 - 容量扩展
 - NULL指针处理
 
-### Model测试 (12个测试用例)
+### Model测试
 - Employee创建和释放
 - EmployeeManager创建和释放
 - 添加职工及参数验证
@@ -275,7 +277,7 @@ make -j4
 - 多字段排序
 - 月度/年度考勤统计
 
-### Storage测试 (9个测试用例)
+### Storage测试
 - 保存和加载数据
 - 空数据处理
 - 文件不存在处理
@@ -285,7 +287,23 @@ make -j4
 - NULL指针处理
 - 大数据集测试
 
-**总计28个测试用例,全部通过!**
+### Sort测试
+- 基本排序功能
+- 自定义比较器
+- 边界条件处理
+
+### Controller测试
+- 系统初始化
+- 用户认证流程
+- 职工信息管理流程
+- 数据持久化
+
+### View测试
+- 菜单显示
+- 输入处理
+- 信息展示
+
+**总计92个测试用例,全部通过!**
 
 ## 代码规范
 

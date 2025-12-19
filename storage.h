@@ -5,18 +5,22 @@
 #include "model.h"
 
 /* 文件头结构 */
+PACK_PUSH
 typedef struct {
     unsigned int magic;      /* 魔数: 0x454D5053 (ASCII: EMPS) */
     unsigned int version;    /* 版本号 */
     unsigned int count;      /* 记录条数 */
     unsigned int checksum;   /* 校验和 */
 } FileHeader;
+PACK_POP
 
 /* 用户凭证结构 */
+PACK_PUSH
 typedef struct {
     char username[MAX_USERNAME_LEN];
     char password[MAX_PASSWORD_LEN];
 } UserCredential;
+PACK_POP
 
 /* ========== 数据存储函数 ========== */
 
