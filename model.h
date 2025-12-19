@@ -6,6 +6,7 @@
 #include "sort.h"
 
 /* 职工结构体 */
+PACK_PUSH
 typedef struct {
     int id;                          /* 工号 */
     char name[MAX_NAME_LEN];         /* 姓名 */
@@ -13,6 +14,7 @@ typedef struct {
     char attend_date[MAX_DATE_LEN];  /* 出勤日期 (YYYY-MM-DD) */
     int attend_days;                 /* 出勤天数 */
 } Employee;
+PACK_POP
 
 /* 职工管理器 */
 typedef struct {

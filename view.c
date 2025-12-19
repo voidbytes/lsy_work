@@ -9,20 +9,96 @@ void view_clear_input_buffer(void) {
     while ((c = getchar()) != '\n' && c != EOF);
 }
 
-/* 创建视图对象 */
-AppView *view_create(void) {
-    AppView *view = (AppView *)malloc(sizeof(AppView));
-    if (view == NULL) {
-        return NULL;
+/* 控制台视图的具体实现函数 */
+static void console_show_menu(AppView *view) {
+    printf("\n");
+    printf("========================================\n");
+    printf("  Employee Management System v1.0\n");
+    printf("========================================\n");
+    printf("  1. Add Employee\n");
+    printf("  2. Remove Employee\n");
+    printf("  3. Update Employee\n");
+    printf("  4. Search Employee\n");
+    printf("  5. Show All Employees\n");
+    printf("  6. Sort Employees\n");
+    printf("  7. Attendance Statistics\n");
+    printf("  8. Export to CSV\n");
+    printf("  9. Save and Exit\n");
+    printf("  0. Exit (without saving)\n");
+    printf("========================================\n");
+}
+
+static void console_render_row(const Employee *emp) {
+    if (emp != NULL) {
+        employee_print(emp);
+    }
+}
+
+static void console_show_message(const char *msg, Bool is_error) {
+    if (msg != NULL) {
+        if (is_error) {
+            printf("\n[ERROR] %s\n", msg);
+        } else {
+            printf("\n[INFO] %s\n", msg);
+        }
+    }
+}
+
+static int console_get_input_int(const char *prompt) {
+    int value;
+    if (prompt != NULL) {
+        printf("%s", prompt);
     }
     
-    view->show_menu = view_show_menu;
-    view->show_table_header = view_show_table_header;
-    view->render_row = view_render_row;
-    view->show_message = view_show_message;
-    view->get_input_int = view_get_input_int;
-    view->get_input_string = view_get_input_string;
+    while (scanf("%d", &value) != 1) {
+        view_clear_input_buffer();
+        printf("Invalid input, please enter an integer: ");
+    }
     
+    view_clear_input_buffer();
+    return value;
+}
+
+static void console_get_input_string(const char *prompt, char *buffer, size_t size) {
+    if (prompt != NULL) {
+        printf("%s", prompt);
+    }
+    
+    if (buffer != NULL && size > 0) {
+        if (fgets(buffer, size, stdin) != NULL) {
+            /* 移除末尾的换行符 */
+            size_t len = strlen(buffer);
+            if (len > 0 && buffer[len - 1] == '\n') {
+                buffer[len - 1] = '\0';
+            }
+        }
+    }
+}
+
+static void console_show_table_header(void) {
+    printf("\n");
+    printf("%-8s %-20s %-20s %-12s %-10s\n",
+           "ID", "Name", "Department", "Attend Date", "Attend Days");
+    printf("------------------------------------------------------------------------\n");
+}
+
+/* 控制台视图接口实现的静态虚表 */
+static const ViewInterface console_interface = {
+    .show_menu = console_show_menu,
+    .render_row = console_render_row,
+    .show_message = console_show_message,
+    .get_input_int = console_get_input_int,
+    .get_input_string = console_get_input_string,
+    .show_table_header = console_show_table_header
+};
+
+/* 构造函数 */
+AppView *view_create_console(void) {
+    AppView *view = (AppView *)malloc(sizeof(AppView));
+    if (view) {
+        view->vptr = &console_interface; // 核心：绑定接口
+        view->user_data = NULL;
+    }
     return view;
 }
 
@@ -33,7 +109,7 @@ void view_free(AppView *view) {
     }
 }
 
-/* 显示主菜单 */
+/* 向后兼容的函数：显示主菜单 */
 void view_show_menu(void) {
     printf("\n");
     printf("========================================\n");

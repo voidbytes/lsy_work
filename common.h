@@ -3,6 +3,18 @@
 
 #include <stddef.h>
 
+/* 兼容不同编译器的 struct pack 写法 */
+#if defined(_MSC_VER)
+    #define PACK_PUSH __pragma(pack(push, 1))
+    #define PACK_POP __pragma(pack(pop))
+#elif defined(__GNUC__) || defined(__clang__)
+    #define PACK_PUSH _Pragma("pack(push, 1)")
+    #define PACK_POP _Pragma("pack(pop)")
+#else
+    #define PACK_PUSH
+    #define PACK_POP
+#endif
+
 /* 布尔类型定义 */
 typedef enum {
     FALSE = 0,

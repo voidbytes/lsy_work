@@ -64,7 +64,8 @@ void employee_manager_free(EmployeeManager *manager) {
     if (manager != NULL) {
         if (manager->employees != NULL) {
             /* 释放所有职工对象 */
-            for (size_t i = 0; i < manager->employees->size; i++) {
+            size_t size = vector_size(manager->employees);
+            for (size_t i = 0; i < size; i++) {
                 Employee *emp = (Employee *)manager->employees->data[i];
                 employee_free(emp);
             }
@@ -91,7 +92,7 @@ ErrorCode employee_manager_add(EmployeeManager *manager, const char *name,
         return ERROR_OUT_OF_MEMORY;
     }
     
-    ErrorCode err = manager->employees->push_back(manager->employees, emp);
+    ErrorCode err = vector_push_back(manager->employees, emp);
     if (err != SUCCESS) {
         employee_free(emp);
         return err;
@@ -106,14 +107,14 @@ ErrorCode employee_manager_remove_at(EmployeeManager *manager, size_t index) {
         return ERROR_NULL_POINTER;
     }
     
-    if (index >= manager->employees->size) {
+    if (index >= vector_size(manager->employees)) {
         return ERROR_INDEX_OUT_OF_BOUNDS;
     }
     
     Employee *emp = (Employee *)manager->employees->data[index];
     employee_free(emp);
     
-    return manager->employees->remove_at(manager->employees, index);
+    return vector_remove_at(manager->employees, index);
 }
 
 ErrorCode employee_manager_remove_by_id(EmployeeManager *manager, int id) {
@@ -121,7 +122,8 @@ ErrorCode employee_manager_remove_by_id(EmployeeManager *manager, int id) {
         return ERROR_NULL_POINTER;
     }
     
-    for (size_t i = 0; i < manager->employees->size; i++) {
+    size_t size = vector_size(manager->employees);
+    for (size_t i = 0; i < size; i++) {
         Employee *emp = (Employee *)manager->employees->data[i];
         if (emp->id == id) {
             return employee_manager_remove_at(manager, i);
@@ -142,7 +144,8 @@ ErrorCode employee_manager_update(EmployeeManager *manager, int id,
         return ERROR_INVALID_PARAMETER;
     }
     
-    for (size_t i = 0; i < manager->employees->size; i++) {
+    size_t size = vector_size(manager->employees);
+    for (size_t i = 0; i < size; i++) {
         Employee *emp = (Employee *)manager->employees->data[i];
         if (emp->id == id) {
             strncpy(emp->name, name, MAX_NAME_LEN - 1);
@@ -170,7 +173,8 @@ Vector *employee_manager_search(EmployeeManager *manager, SearchType type,
         return NULL;
     }
     
-    for (size_t i = 0; i < manager->employees->size; i++) {
+    size_t size = vector_size(manager->employees);
+    for (size_t i = 0; i < size; i++) {
         Employee *emp = (Employee *)manager->employees->data[i];
         Bool match = FALSE;
         
@@ -193,7 +197,7 @@ Vector *employee_manager_search(EmployeeManager *manager, SearchType type,
         }
         
         if (match) {
-            results->push_back(results, emp);
+            vector_push_back(results, emp);
         }
     }
     
@@ -204,7 +208,8 @@ Vector *employee_manager_search(EmployeeManager *manager, SearchType type,
 static int compare_by_id(const void *a, const void *b) {
     Employee *e1 = *(Employee **)a;
     Employee *e2 = *(Employee **)b;
-    return e1->id - e2->id;
+    /* 防止整数溢出的安全比较 */
+    return (e1->id > e2->id) - (e1->id < e2->id);
 }
 
 static int compare_by_name(const void *a, const void *b) {
@@ -228,7 +233,8 @@ static int compare_by_attend_date(const void *a, const void *b) {
 static int compare_by_attend_days(const void *a, const void *b) {
     Employee *e1 = *(Employee **)a;
     Employee *e2 = *(Employee **)b;
-    return e2->attend_days - e1->attend_days;  /* 降序 */
+    /* 降序: e2 > e1 返回 1，防止整数溢出的安全比较 */
+    return (e2->attend_days > e1->attend_days) - (e2->attend_days < e1->attend_days);
 }
 
 void employee_manager_sort(EmployeeManager *manager, SortType type) {
@@ -276,7 +282,8 @@ int employee_manager_monthly_attendance(EmployeeManager *manager,
     int total_days = 0;
     size_t len = strlen(year_month);
     
-    for (size_t i = 0; i < manager->employees->size; i++) {
+    size_t size = vector_size(manager->employees);
+    for (size_t i = 0; i < size; i++) {
         Employee *emp = (Employee *)manager->employees->data[i];
         /* 检查日期是否以year_month开头 (如"2024-01") */
         if (strncmp(emp->attend_date, year_month, len) == 0) {
@@ -296,7 +303,8 @@ int employee_manager_yearly_attendance(EmployeeManager *manager,
     int total_days = 0;
     size_t len = strlen(year);
     
-    for (size_t i = 0; i < manager->employees->size; i++) {
+    size_t size = vector_size(manager->employees);
+    for (size_t i = 0; i < size; i++) {
         Employee *emp = (Employee *)manager->employees->data[i];
         /* 检查日期是否以year开头 (如"2024") */
         if (strncmp(emp->attend_date, year, len) == 0) {
